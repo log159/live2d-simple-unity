@@ -124,29 +124,16 @@ public class Model : MonoBehaviour
         Destroy(Live2dCubismModel);
 
         if (Live2dParametersTransforms != null)
-        {
             foreach (Transform itemname in Live2dParametersTransforms)
-            {
                 Destroy(itemname);
-            }
-        }
 
         if (Live2dPartsTransforms != null)
-        {
             foreach (Transform itemname in Live2dPartsTransforms)
-            {
                 Destroy(itemname);
-
-            }
-        }
 
         if (Live2dDrawablesTransforms != null)
-        {
             foreach (Transform itemname in Live2dDrawablesTransforms)
-            {
                 Destroy(itemname);
-            }
-        }
 
         Destroy(TransformParamAngleX);
         Destroy(TransformParamAngleY);

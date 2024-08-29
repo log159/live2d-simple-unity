@@ -54,6 +54,7 @@ public class SocketBehaviour : MonoBehaviour
         if (socket.Connected)
         {
             print("Connected");
+            //SocketBehaviour.Singleton.Send("Hwnd:" + TransparentWindow.hwnd.ToString() + ";");
             Receive();
         }
         else

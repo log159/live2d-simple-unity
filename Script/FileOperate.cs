@@ -13,13 +13,12 @@ public class FileOperate : MonoBehaviour
     {
 
         string path = System.Environment.CurrentDirectory + "\\model\\STARTMODELPATH.txt";
-        //逐行读取返回的为数组数据
         string[] strs = File.ReadAllLines(path);
         return strs[0];
     }
     public static string GetModelPath()
     {
-        return "D:/Atri/atri_8.model3.json";
+        return "D:/L2dDemoFile/Atri/atri_8.model3.json";
     }
 
 

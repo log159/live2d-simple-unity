@@ -11,54 +11,54 @@ public class ExplainLoom : MonoBehaviour
 {
     static bool LeftMouseDown = false;
     static bool RightMouseDown = false;
-    static PointF RelativePosition=new PointF(0f,0f);
+    static PointF RelativePosition = new PointF(0f, 0f);
 
     // 消息处理主循环
     void Update()
     {
 
         //鼠标消息
-        if (Input.GetMouseButtonDown(0)){
+        if (Input.GetMouseButtonDown(0))
+        {
             print("鼠标左键被按下！");
-            LeftMouseDown = true;
+            if (MouseInformation.ChangeColor.r == 0 && MouseInformation.ChangeColor.g == 0 && MouseInformation.ChangeColor.b == 0) { LeftMouseDown = false; }
+            else LeftMouseDown = true;
+
             RelativePosition.X = Config.PositionXItem.Param - MouseInformation.WorldX;
             RelativePosition.Y = Config.PositionYItem.Param - MouseInformation.WorldY;
 
         }
-        if (Input.GetMouseButtonUp(0)){
+        if (Input.GetMouseButtonUp(0))
+        {
             print("鼠标左键被松开！");
             LeftMouseDown = false;
         }
-        if (Input.GetMouseButtonDown(1)){
+        if (Input.GetMouseButtonDown(1))
+        {
             print("鼠标右键被按下！");
-            RightMouseDown= true;
+            if (MouseInformation.ChangeColor.r == 0 && MouseInformation.ChangeColor.g == 0 && MouseInformation.ChangeColor.b == 0) { RightMouseDown = false; }
+            else { RightMouseDown = true; }
+            
         }
-        if (Input.GetMouseButtonUp(1)){
+        if (Input.GetMouseButtonUp(1))
+        {
             print("鼠标右键被松开！");
             RightMouseDown = false;
         }
         //Debug.Log(MouseInformation.ChangeColor.r +"  " +MouseInformation.ChangeColor.g+"   "+ MouseInformation.ChangeColor.b);
         if (LeftMouseDown)
         {
-            if (MouseInformation.ChangeColor.r == 0 && MouseInformation.ChangeColor.g == 0 && MouseInformation.ChangeColor.b == 0){}
-            else
-            {
                 Config.PositionXItem.Param = RelativePosition.X + MouseInformation.WorldX;
                 Config.PositionYItem.Param = RelativePosition.Y + MouseInformation.WorldY;
                 GetComponent<Model>().UpdateModelCondition();
-            }
         }
-        if (RightMouseDown){
-            if (MouseInformation.ChangeColor.r == 0 && MouseInformation.ChangeColor.g == 0 && MouseInformation.ChangeColor.b == 0){}
-            else
-            {
+        if (RightMouseDown)
+        {
                 Vector2 posv2 = new Vector2(Config.PositionXItem.Param, Config.PositionYItem.Param);
                 posv2 = Camera.main.WorldToScreenPoint(posv2);
-                string posStr= "Pos:"+ posv2.x.ToString()+","+ posv2.y.ToString()+","+ MouseInformation.TrueX.ToString()+","+ MouseInformation.TrueY.ToString()+";";
+                string posStr = "Pos:" + posv2.x.ToString() + "," + posv2.y.ToString() + "," + MouseInformation.TrueX.ToString() + "," + MouseInformation.TrueY.ToString() + ";";
                 SocketBehaviour.Singleton.Send(posStr);
                 RightMouseDown = false;
-            }
-
         }
 
 
@@ -85,7 +85,7 @@ public class ExplainLoom : MonoBehaviour
         }
         Loom.RemoveList();
     }
-    private void HandleRequest(string key,string value)
+    private void HandleRequest(string key, string value)
     {
         //模型切换初始化
         if (key == "Init")
@@ -101,40 +101,68 @@ public class ExplainLoom : MonoBehaviour
                 PlayAudioFromFile.AddAudioPathsList(value);
         }
         //Window信息
-        if (key == "Window")
-        {
-            GameObject cameraObject = GameObject.Find("Camera");
-            if (cameraObject != null)
-            {
-                try
-                {
-                    if (value == "wintop")
-                        WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinTop);
-                    else if (value == "winapha")
-                        WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinApha);
-                    else if (value == "wintopapha")
-                        WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinTopApha);
-                    else if (value == "winnotopnoapha")
-                        WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinNoTopNoApha);
-                }
-                catch (Exception e)
-                {
-                    Debug.Log(e.Message);
-                }
-            }
-        }
+        //if (key == "Window")
+        //{
+        //    GameObject cameraObject = GameObject.Find("Camera");
+        //    if (cameraObject != null)
+        //    {
+        //        try
+        //        {
+        //            if (value == "wintop")
+        //                WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinTop);
+        //            else if (value == "winapha")
+        //                WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinApha);
+        //            else if (value == "wintopapha")
+        //                WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinTopApha);
+        //            else if (value == "winnotopnoapha")
+        //                WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinNoTopNoApha);
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            Debug.Log(e.Message);
+        //        }
+        //    }
+        //}
+        //if (key == "Hwnd")
+        //{
+        //    string[] parts = value.Split(',');
+        //    if (parts.Length != 2)
+        //    {
+        //        Debug.LogError("Input string does not contain expected format.");
+        //    }
+        //    else
+        //    {
+        //        string itemname = parts[0].Trim();
+        //        string itemval = parts[1].Trim();
+        //        if (itemname == "dialog")
+        //        {
+        //            if (int.Parse(itemval) != 0)
+        //            {
+        //                TransparentWindow.dialogHwnd = new IntPtr(int.Parse(itemval));
+        //                Debug.Log(TransparentWindow.dialogHwnd.ToString());
+        //            }
+        //            else
+        //            {
+        //                TransparentWindow.dialogHwnd = IntPtr.Zero;
+        //                Debug.Log("句柄无效！");
+        //            }
+        //        }
+        //    }
+        //}
         //参数信息修改
         if (key == "Config")
         {
             string[] parts = value.Split(',');
-            if(parts.Length != 2){
+            if (parts.Length != 2)
+            {
                 Debug.LogError("Input string does not contain expected format.");
             }
             else
             {
                 string itemname = parts[0].Trim();
                 float itemval;
-                if (float.TryParse(parts[1].Trim(), out itemval)) {
+                if (float.TryParse(parts[1].Trim(), out itemval))
+                {
                     switch (itemname)
                     {
                         //布尔参数---------------------------------------------------------------------------------------------------
@@ -170,18 +198,18 @@ public class ExplainLoom : MonoBehaviour
                         //其它参数
                         default: break;
                     }
-                    Model model= GetComponent<Model>();
+                    Model model = GetComponent<Model>();
                     if (model != null) model.UpdateModelCondition();
                 }
                 else { Debug.LogError("Failed to parse value as float."); }
             }
         }
 
-        //控件位置
+        //控件偏移
         if (key == "Item")
         {
             string[] parts = value.Split(',');
-            if (parts.Length != 2){Debug.LogError("Input string does not contain expected format.");}
+            if (parts.Length != 2) { Debug.LogError("Input string does not contain expected format."); }
             else
             {
                 string itemname = parts[0].Trim();
@@ -196,7 +224,7 @@ public class ExplainLoom : MonoBehaviour
             }
         }
         //控件渲染
-        if(key == "Draw")
+        if (key == "Draw")
         {
             string[] parts = value.Split(',');
             if (parts.Length != 2) { Debug.LogError("Input string does not contain expected format."); }
@@ -226,7 +254,7 @@ public class ExplainLoom : MonoBehaviour
             else if (valueStr == "active")
                 GetComponent<Model>().InitModelDrawables();
             //加载渲染设定值
-            else if(valueStr == "appoint")
+            else if (valueStr == "appoint")
                 GetComponent<Model>().UpdateModelDrawables();
         }
     }

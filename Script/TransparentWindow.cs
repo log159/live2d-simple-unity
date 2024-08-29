@@ -133,6 +133,7 @@ public class TransparentWindow : MonoBehaviour
 
     bool istop = true;
 
+    /*
     void Awake()
     {
 
@@ -311,5 +312,6 @@ public class TransparentWindow : MonoBehaviour
     {
         ShowWindow(hwnd, SW_HIDE);
     }
+    */
 
 }
