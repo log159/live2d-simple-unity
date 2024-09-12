@@ -25,7 +25,6 @@ public class LookMouse : MonoBehaviour, ICubismLookTarget
         else
         {
             return Model.Live2dObjectTransform.position;
-            //return Vector3.zero;
         }
 
     }

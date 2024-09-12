@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
 
+//旧的加载方式 接收即播放
 //public class PlayAudioFromFile : MonoBehaviour
 //{
 //    public void PlayAudioByPath(string path)
@@ -48,7 +49,7 @@ using UnityEngine.Networking;
 
 //}
 
-
+//新的加载方式 音频播放队列
 public class PlayAudioFromFile : MonoBehaviour
 {
     public static List<string> AudioPathsList=new List<string>();
@@ -75,8 +76,11 @@ public class PlayAudioFromFile : MonoBehaviour
         {
             if (AudioPathsList.Count > 0)
             {
+                Debug.Log("当前正在播放: "+ AudioPathsList[0]);
                 yield return StartCoroutine(LoadAndPlayAudioFile(AudioPathsList[0], audioSource));
-                AudioPathsList.RemoveAt(0);
+                if(AudioPathsList.Count>=1) {
+                    AudioPathsList.RemoveAt(0);
+                }
             }
             else
             {

@@ -12,13 +12,13 @@ public class FileOperate : MonoBehaviour
     public static string GetModelJsonPath()
     {
 
-        string path = System.Environment.CurrentDirectory + "\\model\\STARTMODELPATH.txt";
+        string path = System.Environment.CurrentDirectory + "/Model/STARTMODELPATH.txt";
         string[] strs = File.ReadAllLines(path);
         return strs[0];
     }
     public static string GetModelPath()
     {
-        return "D:/L2dDemoFile/Atri/atri_8.model3.json";
+        return "";
     }
 
 

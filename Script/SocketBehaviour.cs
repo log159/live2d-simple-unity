@@ -7,6 +7,7 @@ using UnityEngine;
 
 using System.Threading;
 using System.Linq;
+using System.Collections.Generic;
 
 public class SocketBehaviour : MonoBehaviour
 {
@@ -34,6 +35,12 @@ public class SocketBehaviour : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        string pathini=System.Environment.CurrentDirectory + "\\config.ini";
+
+        Dictionary<string, Dictionary<string, string>> dicini = SocketBehaviour.ParseIniFile(pathini);
+        host = dicini["SERVERS"]["ADDRESS"];
+        port = int.Parse(dicini["SERVERS"]["PORT"]);
+
         socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         GameObj = this.gameObject;
 
@@ -54,7 +61,7 @@ public class SocketBehaviour : MonoBehaviour
         if (socket.Connected)
         {
             print("Connected");
-            //SocketBehaviour.Singleton.Send("Hwnd:" + TransparentWindow.hwnd.ToString() + ";");
+            SocketBehaviour.Singleton.Send("Hwnd:" + TransparentWindow.hwnd.ToString() + ";");
             Receive();
         }
         else
@@ -118,6 +125,42 @@ public class SocketBehaviour : MonoBehaviour
             socket.Close();
         }
     }
+
+
+    public static Dictionary<string, Dictionary<string, string>> ParseIniFile(string filePath)
+    {
+        Dictionary<string, Dictionary<string, string>> iniData = new Dictionary<string, Dictionary<string, string>>();
+
+        using (StreamReader reader = new StreamReader(filePath))
+        {
+            string section = "";
+            Dictionary<string, string> sectionData = new Dictionary<string, string>();
+
+            while (!reader.EndOfStream)
+            {
+                string line = reader.ReadLine().Trim();
+
+                if (line.StartsWith("[") && line.EndsWith("]"))
+                {
+                    // 开始一个新的节
+                    section = line.Substring(1, line.Length - 2);
+                    sectionData = new Dictionary<string, string>();
+                    iniData[section] = sectionData;
+                }
+                else if (line.Contains("="))
+                {
+                    // 解析键值对
+                    string[] parts = line.Split('=');
+                    string key = parts[0].Trim();
+                    string value = parts[1].Trim();
+                    sectionData[key] = value;
+                }
+            }
+        }
+
+        return iniData;
+    }
+
 
 
 }

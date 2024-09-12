@@ -1,3 +1,5 @@
+#define IS_LOGCHAT
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,6 +8,7 @@ using System.IO;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
+
 
 public class ExplainLoom : MonoBehaviour
 {
@@ -16,8 +19,15 @@ public class ExplainLoom : MonoBehaviour
     // 消息处理主循环
     void Update()
     {
-
         //鼠标消息
+        MouseEvent();
+
+        //Tcp 通信消息
+        TcpEvent();
+    }
+
+    private void MouseEvent()
+    {
         if (Input.GetMouseButtonDown(0))
         {
             print("鼠标左键被按下！");
@@ -38,7 +48,7 @@ public class ExplainLoom : MonoBehaviour
             print("鼠标右键被按下！");
             if (MouseInformation.ChangeColor.r == 0 && MouseInformation.ChangeColor.g == 0 && MouseInformation.ChangeColor.b == 0) { RightMouseDown = false; }
             else { RightMouseDown = true; }
-            
+
         }
         if (Input.GetMouseButtonUp(1))
         {
@@ -48,22 +58,24 @@ public class ExplainLoom : MonoBehaviour
         //Debug.Log(MouseInformation.ChangeColor.r +"  " +MouseInformation.ChangeColor.g+"   "+ MouseInformation.ChangeColor.b);
         if (LeftMouseDown)
         {
-                Config.PositionXItem.Param = RelativePosition.X + MouseInformation.WorldX;
-                Config.PositionYItem.Param = RelativePosition.Y + MouseInformation.WorldY;
-                GetComponent<Model>().UpdateModelCondition();
+            Config.PositionXItem.Param = RelativePosition.X + MouseInformation.WorldX;
+            Config.PositionYItem.Param = RelativePosition.Y + MouseInformation.WorldY;
+            GetComponent<Model>().UpdateModelCondition();
         }
         if (RightMouseDown)
         {
-                Vector2 posv2 = new Vector2(Config.PositionXItem.Param, Config.PositionYItem.Param);
+#if IS_LOGCHAT
+            Vector2 posv2 = new Vector2(Config.PositionXItem.Param, Config.PositionYItem.Param);
                 posv2 = Camera.main.WorldToScreenPoint(posv2);
                 string posStr = "Pos:" + posv2.x.ToString() + "," + posv2.y.ToString() + "," + MouseInformation.TrueX.ToString() + "," + MouseInformation.TrueY.ToString() + ";";
                 SocketBehaviour.Singleton.Send(posStr);
                 RightMouseDown = false;
+#endif
         }
+    }
 
-
-
-        //Tcp 通信消息
+    private void TcpEvent()
+    {
         if (Loom.IsEmpty()) { return; }
         try
         {
@@ -101,54 +113,57 @@ public class ExplainLoom : MonoBehaviour
                 PlayAudioFromFile.AddAudioPathsList(value);
         }
         //Window信息
-        //if (key == "Window")
-        //{
-        //    GameObject cameraObject = GameObject.Find("Camera");
-        //    if (cameraObject != null)
-        //    {
-        //        try
-        //        {
-        //            if (value == "wintop")
-        //                WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinTop);
-        //            else if (value == "winapha")
-        //                WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinApha);
-        //            else if (value == "wintopapha")
-        //                WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinTopApha);
-        //            else if (value == "winnotopnoapha")
-        //                WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinNoTopNoApha);
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            Debug.Log(e.Message);
-        //        }
-        //    }
-        //}
-        //if (key == "Hwnd")
-        //{
-        //    string[] parts = value.Split(',');
-        //    if (parts.Length != 2)
-        //    {
-        //        Debug.LogError("Input string does not contain expected format.");
-        //    }
-        //    else
-        //    {
-        //        string itemname = parts[0].Trim();
-        //        string itemval = parts[1].Trim();
-        //        if (itemname == "dialog")
-        //        {
-        //            if (int.Parse(itemval) != 0)
-        //            {
-        //                TransparentWindow.dialogHwnd = new IntPtr(int.Parse(itemval));
-        //                Debug.Log(TransparentWindow.dialogHwnd.ToString());
-        //            }
-        //            else
-        //            {
-        //                TransparentWindow.dialogHwnd = IntPtr.Zero;
-        //                Debug.Log("句柄无效！");
-        //            }
-        //        }
-        //    }
-        //}
+        if (key == "Window")
+        {
+            GameObject cameraObject = GameObject.Find("Camera");
+            if (cameraObject != null)
+            {
+                try
+                {
+                    if (value == "wintop")
+                        WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinTop);
+                    else if (value == "winapha")
+                        WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinApha);
+                    else if (value == "wintopapha")
+                        WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinTopApha);
+                    else if (value == "winnotopnoapha")
+                        WindowSetting.SetWindowTopApha(TransparentWindow.enumWinStyle.WinNoTopNoApha);
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e.Message);
+                }
+            }
+        }
+
+#if IS_LOGCHAT
+        if (key == "Hwnd")
+        {
+            string[] parts = value.Split(',');
+            if (parts.Length != 2)
+            {
+                Debug.LogError("Input string does not contain expected format.");
+            }
+            else
+            {
+                string itemname = parts[0].Trim();
+                string itemval = parts[1].Trim();
+                if (itemname == "dialog")
+                {
+                    if (int.Parse(itemval) != 0)
+                    {
+                        TransparentWindow.dialogHwnd = new IntPtr(int.Parse(itemval));
+                        Debug.Log(TransparentWindow.dialogHwnd.ToString());
+                    }
+                    else
+                    {
+                        TransparentWindow.dialogHwnd = IntPtr.Zero;
+                        Debug.Log("句柄无效！");
+                    }
+                }
+            }
+        }
+#endif
         //参数信息修改
         if (key == "Config")
         {
