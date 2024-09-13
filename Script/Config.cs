@@ -90,15 +90,15 @@ public class Config : MonoBehaviour
     public static ParamItem RotationRZItem = new ParamItem("Rotation", 0f, new PointF(MIN, MAX));
 
 
-    //主轴物理参数
+    //看向鼠标主轴物理参数
     public static ParamItem ParamAngleItem = new ParamItem("ParamAngle", 30f, new PointF(0f, 30f));
-    //身体轴物理参数
+    //看向鼠标身体轴物理参数
     public static ParamItem ParamBodyAngleItem = new ParamItem("ParamBodyAngle", 10f, new PointF(0f, 30f));
-    //眼睛轴物理参数
+    //看向鼠标眼睛轴物理参数
     public static ParamItem ParamEyeBallItem = new ParamItem("ParamEyeBall", 1f, new PointF(0f, 30f));
     //平均眨眼周期参数
     public static ParamItem MeanItem = new ParamItem("Mean", 2.5f, new PointF(1f, 10f));
-    //最大偏差时间参数
+    //眨眼最大偏差时间参数
     public static ParamItem MaximumDeviationItem = new ParamItem("MaximumDeviation", 2f, new PointF(0.5f, 5f));
     //眨眼速度参数
     public static ParamItem TimescaleItem = new ParamItem("Timescale", 10f, new PointF(1f, 20f));
