@@ -1,5 +1,4 @@
-//#define IS_LOGCHAT
-#define IS_LIVE2D_API
+#define IS_LOGCHAT
 
 using System;
 using System.Collections;
@@ -234,7 +233,7 @@ public class ExplainLoom : MonoBehaviour
                 {
                     itemval = itemval / (float)100.0;
                     Model model = GetComponent<Model>();
-                    if (model != null) model.AddParamsList(itemname, itemval);
+                    if (model != null) model.AddParameterList(itemname, itemval);
                 }
                 else { Debug.LogError("Failed to parse value as float."); }
             }
@@ -251,7 +250,7 @@ public class ExplainLoom : MonoBehaviour
                 if (float.TryParse(parts[1].Trim(), out itemval))
                 {
                     Model model = GetComponent<Model>();
-                    if (model != null) model.AddDrawsList(itemname, itemval);
+                    if (model != null) model.AddDrawableList(itemname, itemval);
                 }
                 else { Debug.LogError("Failed to parse value as float."); }
             }
@@ -265,13 +264,13 @@ public class ExplainLoom : MonoBehaviour
                 GetComponent<Model>().InitModelParameters();
             //加载位置设定值
             else if (valueStr == "self")
-                GetComponent<Model>().UpdateModelParameters();
+                GetComponent<Model>().InitSelfModelParameters();
             //加载渲染默认值
             else if (valueStr == "active")
                 GetComponent<Model>().InitModelDrawables();
             //加载渲染设定值
             else if (valueStr == "appoint")
-                GetComponent<Model>().UpdateModelDrawables();
+                GetComponent<Model>().InitSelfModelDrawables();
         }
     }
 

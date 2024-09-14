@@ -135,6 +135,7 @@ public class TransparentWindow : MonoBehaviour
 
     bool istop = true;
 
+
 #if IS_TRANSPARENT
     void Awake()
     {
@@ -270,7 +271,7 @@ public class TransparentWindow : MonoBehaviour
 
 #endif
 
-    public void SetWinStyle(enumWinStyle enumWinStyle)
+        public void SetWinStyle(enumWinStyle enumWinStyle)
     {
         WinStyle = enumWinStyle;
     }

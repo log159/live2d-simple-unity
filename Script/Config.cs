@@ -22,15 +22,24 @@ public class Config : MonoBehaviour
             return instance;
         }
     }
+    /// <summary>
+    /// 常量信息
+    /// </summary>
+    public static readonly string ModelConfigFileName       = "ModelConfig.ini";
+    public static readonly string BaseParameterName         = "PARAMETERLIST";
+    public static readonly string BaseDrawable              = "DRAWABLELIST";
+    public static readonly string BaseParameterChangeName   = "PARAMETERCHANGELIST";
+    public static readonly string BaseDrawableChange        = "DRAWABLECHANGELIST";
+
 
     /// <summary>
     /// 基本信息
     /// </summary>
-    public static string ModelPath = null;
-    public static string DirectoryPath = null;
-    public static string PersonName = "";
-    public static string ModelName = "Model";
-    public static int ModelId = 0;
+    public static string ModelPath      = null;
+    public static string DirectoryPath  = null;
+    public static string PersonName     = "";
+    public static string ModelName      = "Model";
+    public static int    ModelId        = 0;
 
     /// <summary>
     /// 布尔参数
