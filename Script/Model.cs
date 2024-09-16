@@ -23,6 +23,7 @@ using System.Data.Common;
 using System.Text.RegularExpressions;
 using System.Linq;
 using Live2D.Cubism.Framework.Physics;
+using System.Runtime.CompilerServices;
 
 public class Model : MonoBehaviour
 {
@@ -81,7 +82,7 @@ public class Model : MonoBehaviour
         //删除上一个模型
         DestroyModel();
         //初始化模型
-        string path = "D:/XXX/XXX.model3.json";
+        string path = "D:\\Model\\Live2d模型v4\\Mao\\Mao.model3.json";
         InitModelByPath(path);
 
     }
@@ -113,9 +114,19 @@ public class Model : MonoBehaviour
             //InitSelfModelParts();
             //InitSelfModelDrawables();
 
+            /*---下面这两种形式等效,实际上有必要使用f后缀表示这是一个小数--*/
+            //new Tuple<string, float>("name", 0f);
+            //Tuple.Create("name", 0f);
+
+            //Parameter偏移值
             //ParamItemsDic["XXX"] = 100;
-            //PartItemsList.Add(Tuple.Create("CCC", 0.3f));
-            //DrawItemsList.Add(Tuple.Create("VVV", 0f));
+            //part控件组
+            //PartItemsList.Add(Tuple.Create("XXX", 0f));
+            //PartItemsList.Add(Tuple.Create("XXX", 0.5f));
+            //Drawable单独控件
+            //DrawItemsList.Add(Tuple.Create("XXX", 0f));
+
+
         }
         catch (Exception e)
         {
