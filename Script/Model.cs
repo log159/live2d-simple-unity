@@ -1,6 +1,3 @@
-#define IS_SIMPLE
-//#define IS_UNABRIDGED
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,6 +21,8 @@ using System.Data.SqlTypes;
 using System.Drawing;
 using System.Data.Common;
 using System.Text.RegularExpressions;
+using System.Linq;
+using Live2D.Cubism.Framework.Physics;
 
 public class Model : MonoBehaviour
 {
@@ -62,7 +61,9 @@ public class Model : MonoBehaviour
     private static List<GameObject> OpeningLive2dModelList = new List<GameObject>();
     //Params Dictionary
     private static Dictionary<string, float> ParamItemsDic = new Dictionary<string, float>();
-    //Draws Dictionary
+    //Parts List
+    private static List<Tuple<string, float>> PartItemsList = new List<Tuple<string, float>>();
+    //Draws List
     private static List<Tuple<string, float>> DrawItemsList = new List<Tuple<string, float>>();
 
 
@@ -73,14 +74,14 @@ public class Model : MonoBehaviour
     void Start()
     {
         InitModel();
+
     }
     public void InitModel()
     {
         //删除上一个模型
         DestroyModel();
         //初始化模型
-        //string path = "D:/XXX/XXX.model3.json";
-        string path = "D:\\Model\\XXX.model3.json";
+        string path = "D:/XXX/XXX.model3.json";
         InitModelByPath(path);
 
     }
@@ -90,6 +91,7 @@ public class Model : MonoBehaviour
     /// </summary>
     private void InitModelByPath(string path)
     {
+        Debug.Log("json path :" + path);
         Config.ModelPath = path;
         string filePath = Config.ModelPath;
         int index = filePath.Length - 1;
@@ -100,27 +102,20 @@ public class Model : MonoBehaviour
 
         try
         {
-#if IS_SIMPLE
             //通过Json初始化模型
             InitJsonFunction();
             //脚本及参数初始化
             InitModelFunction();
-#elif IS_UNABRIDGED
-            //通过Json初始化模型
-            InitJsonFunction();
-            //脚本及参数初始化
-            InitModelFunction();
-            //生成模型的谐波控件列表
-            InitModelHarmonic();
-            //根据谐波控件列表初始化控件参数
-            InitSelfModelParameters();
-            InitSelfModelDrawables();
-#endif
-            //other...
-            //指定控件隐藏
-            DrawItemsList.Add(new Tuple<string, float>("XXX", 0));
-            //指定控件偏移
-            ParamItemsDic["XXX"] = 3f;
+            ////生成模型的谐波控件列表
+            //InitModelHarmonic();
+            ////根据谐波控件列表初始化控件参数
+            //InitSelfModelParameters();
+            //InitSelfModelParts();
+            //InitSelfModelDrawables();
+
+            //ParamItemsDic["XXX"] = 100;
+            //PartItemsList.Add(Tuple.Create("CCC", 0.3f));
+            //DrawItemsList.Add(Tuple.Create("VVV", 0f));
         }
         catch (Exception e)
         {
@@ -129,77 +124,30 @@ public class Model : MonoBehaviour
     }
 
     /// <summary>
-    /// 删除模型
-    /// </summary>
-    public void DestroyModel()
-    {
-        Destroy(Live2dParameters);
-        Destroy(Live2dParts);
-        Destroy(Live2dDrawables);
-        Destroy(Live2dCubismModel);
-
-        if (Live2dParametersTransforms != null)
-            foreach (Transform itemname in Live2dParametersTransforms)
-                Destroy(itemname);
-
-        if (Live2dPartsTransforms != null)
-            foreach (Transform itemname in Live2dPartsTransforms)
-                Destroy(itemname);
-
-        if (Live2dDrawablesTransforms != null)
-            foreach (Transform itemname in Live2dDrawablesTransforms)
-                Destroy(itemname);
-
-        Destroy(TransformParamAngleX);
-        Destroy(TransformParamAngleY);
-        Destroy(TransformParamAngleZ);
-        Destroy(TransformParamBodyAngleX);
-        Destroy(TransformParamBodyAngleY);
-        Destroy(TransformParamBodyAngleZ);
-        Destroy(TransformParamEyeBallX);
-        Destroy(TransformParamEyeBallY);
-
-
-        while (OpeningLive2dModelList.Count > 0)
-        {
-            GameObject lt = OpeningLive2dModelList[0];
-            Destroy(lt);
-            OpeningLive2dModelList.RemoveAt(0);
-        }
-        OpeningLive2dModelList.Clear();
-        ParamItemsDic.Clear();
-
-        Resources.UnloadUnusedAssets();
-
-    }
-
-    /// <summary>
     /// 通过Json初始化模型
     /// </summary>
     private void InitJsonFunction()
     {
-        string fileName = Path.GetFileName(Config.ModelPath);
-
-        //名字
-        Config.PersonName = fileName.Substring(0, fileName.Length - ".model3.json".Length);
 
         //读取Json 文件
         this.Live2dModel3Json = CubismModel3Json.LoadAtPath(Config.ModelPath, BuiltInLoadAtPath);
         if (Live2dModel3Json != null)
             Live2dCubismModel = Live2dModel3Json.ToModel();
         else
-        {
-            Application.Quit();
             return;
-        }
-        //Live2D Object
+        Debug.Log("model name: " + Live2dCubismModel.name);
+        Config.PersonName = Live2dCubismModel.name;
+        //Live2d Object
         this.Live2dObject = GameObject.Find(Config.PersonName);
-        this.Live2dObject.name = Config.ModelName + Config.ModelId.ToString();
-        Config.ModelId++;
-
-        OpeningLive2dModelList.Add(this.Live2dObject);
+        //添加到已经打开的Live2d列表
         if (Live2dObject == null)
             throw new Exception("Object is null");
+        OpeningLive2dModelList.Add(this.Live2dObject);
+        //模型物体名字加编号
+        this.Live2dObject.name = Config.ModelName + Config.ModelId.ToString();
+        //编号++
+        Config.ModelId++;
+        //模型位置信息
         Live2dObjectTransform = Live2dObject.transform;
         //Parameters Object
         this.Live2dParameters = Live2dObject.transform.Find("Parameters").gameObject;
@@ -226,24 +174,26 @@ public class Model : MonoBehaviour
     /// </summary>
     private void InitModelHarmonic()
     {
-
         string directoryPath = Config.DirectoryPath;
         if (directoryPath == null) return;
-
+        if (Live2dObject == null) return;
         CubismModel cubismModel = Live2dObject.FindCubismModel();
-        Vector3 vector3 = new Vector3();
+        if (cubismModel == null) return;
 
         Dictionary<string, string> parameterDic = new();
+        Dictionary<string, string> partDic = new();
         Dictionary<string, string> drawableDic = new();
         //控件偏移
         for (int i = 0; i < cubismModel.Parameters.Length; ++i)
         {
             CubismParameter cubismParameter = cubismModel.Parameters[i];
-
-            vector3.x = cubismParameter.DefaultValue;
-            vector3.y = cubismParameter.MinimumValue;
-            vector3.z = cubismParameter.MaximumValue;
-            parameterDic[cubismParameter.name] = ("\"" + vector3.x.ToString() + "," + vector3.y.ToString() + "," + vector3.z.ToString() + "\"");
+            parameterDic[cubismParameter.name] = ("\"" + cubismParameter.DefaultValue.ToString() + "," + cubismParameter.MinimumValue.ToString() + "," + cubismParameter.MaximumValue.ToString() + "\"");
+        }
+        //控件透明度
+        for (int i = 0; i < cubismModel.Parts.Length; ++i)
+        {
+            CubismPart cubismPart = cubismModel.Parts[i];
+            partDic[cubismPart.name] = ("\"" + 1.0f.ToString() + "," + 0.0f.ToString() + "," + 1.0f.ToString() + "\"");
         }
         //控件显示隐藏
         for (int i = 0; i < cubismModel.Drawables.Length; ++i)
@@ -252,15 +202,11 @@ public class Model : MonoBehaviour
             drawableDic[cubismDrawable.name] = "\"1\"";
         }
         Dictionary<string, Dictionary<string, string>> data = new();
-        data.Add(Config.BaseParameterName, parameterDic);
+        data.Add(Config.BaseParameter, parameterDic);
+        data.Add(Config.BasePart, partDic);
         data.Add(Config.BaseDrawable, drawableDic);
         string iniPath = directoryPath + Config.ModelConfigFileName;
         Debug.Log("ini path:" + iniPath);
-        if (!FileOperate.FileExists(iniPath))
-        {
-            FileStream fs = File.Create(iniPath);
-            fs.Close();
-        }
         FileOperate.WriteIniFile(data, iniPath);
     }
 
@@ -270,7 +216,6 @@ public class Model : MonoBehaviour
     /// </summary>
     private void InitModelFunction()
     {
-        if (Live2dObject == null) { return; }
         //设置默认挂载脚本
         AddComponentFunction();
         //设置模型大小
@@ -284,7 +229,7 @@ public class Model : MonoBehaviour
         Live2dObject.GetComponent<CubismEyeBlinkController>().BlendMode = CubismParameterBlendMode.Override;
         Live2dObject.GetComponent<CubismMouthController>().BlendMode = CubismParameterBlendMode.Override;
         Live2dObject.GetComponent<CubismAudioMouthInput>().SamplingQuality = CubismAudioSamplingQuality.Maximum;
-        // 使用这个方法  
+        Live2dObject.GetComponent<CubismPoseController>().defaultPoseIndex = 0;
         FindTransform("PAX", out TransformParamAngleX);
         FindTransform("PAY", out TransformParamAngleY);
         FindTransform("PAZ", out TransformParamAngleZ);
@@ -305,7 +250,7 @@ public class Model : MonoBehaviour
         if (TransformParamEyeBallX != null) TransformParamEyeBallX.gameObject.GetComponent<CubismLookParameter>().Axis = CubismLookAxis.X;
         if (TransformParamEyeBallY != null) TransformParamEyeBallY.gameObject.GetComponent<CubismLookParameter>().Axis = CubismLookAxis.Y;
 
-        //变化时更新模型参数
+        //根据Config刷新脚本参数
         UpdateModelCondition();
     }
 
@@ -325,46 +270,92 @@ public class Model : MonoBehaviour
     {
         Live2dObject.transform.rotation = Quaternion.Euler(vector3.x, vector3.y, vector3.z);
     }
+    public void AddParameterDic(string itemName, float value)
+    {
+        ParamItemsDic[itemName] = value;
+    }
+
+    public void AddPartList(string itemName, float value)
+    {
+        PartItemsList.Add(Tuple.Create(itemName, value));
+    }
+    public void AddDrawableList(string itemName, float value)
+    {
+
+        DrawItemsList.Add(Tuple.Create(itemName, value));
+    }
     /// <summary>
     /// 初始模型控件协调
     /// </summary>
     public void InitModelParameters()
     {
         CubismModel cubismModel = Live2dObject.FindCubismModel();
-        for (int i = 0; i < cubismModel.Parameters.Length; ++i)
-        {
-            CubismParameter cubismParameter = cubismModel.Parameters[i];
-            cubismParameter.Value = cubismParameter.DefaultValue;
-            AddParameterList(cubismParameter.Id, cubismParameter.DefaultValue);
+        if (cubismModel == null) return;
 
+        for (int i = 0; i < ParamItemsDic.Count; ++i)
+        {
+            KeyValuePair<string, float> item = ParamItemsDic.ElementAt(i);
+            CubismParameter cubismParameter = cubismModel.Parameters.FindById(item.Key);
+            if (cubismParameter == null) continue;
+            AddParameterDic(item.Key, cubismParameter.DefaultValue);
+        }
+
+    }
+    /// <summary>
+    /// 初始模型控件透明度初始化
+    /// </summary>
+    public void InitModelParts()
+    {
+        CubismModel cubismModel = Live2dObject.FindCubismModel();
+        for (int i = 0; i < cubismModel.Parts.Length; ++i)
+        {
+            CubismPart cubismPart = cubismModel.Parts[i];
+            cubismPart.Opacity = 1.0f;
+            AddPartList(cubismPart.name, 1.0f);
         }
     }
+
     /// <summary>
     /// 初始模型控件显示
     /// </summary>
     public void InitModelDrawables()
     {
-        foreach (Transform itemname in Live2dDrawablesTransforms)
+        CubismModel cubismModel = Live2dObject.FindCubismModel();
+        for (int i = 0; i < cubismModel.Drawables.Length; ++i)
         {
-            AddDrawableList(itemname.gameObject.name, 1);
+            CubismDrawable cubismDrawable = cubismModel.Drawables[i];
+            if (cubismDrawable.gameObject.activeSelf == false)
+                AddDrawableList(cubismDrawable.name, 1.0f);
         }
     }
 
     /// <summary>
-    /// 自定义控件协调更新
+    /// 自定义控件协调初始化
     /// </summary>
     public void InitSelfModelParameters()
     {
         string filePath = Config.DirectoryPath + Config.ModelConfigFileName;
         Dictionary<string, Dictionary<string, string>> dataDic = FileOperate.ParseIniFile(filePath);
-        if (!dataDic.ContainsKey(Config.BaseParameterChangeName)) return;
-        Dictionary<string, string> parameterDic = dataDic[Config.BaseParameterChangeName];
+        if (!dataDic.ContainsKey(Config.BaseParameterChange)) return;
+        Dictionary<string, string> parameterDic = dataDic[Config.BaseParameterChange];
         foreach (KeyValuePair<string, string> item in parameterDic)
-            AddParameterList(item.Key, float.Parse(item.Value) / 100f);
+            AddParameterDic(item.Key, float.Parse(item.Value) / 100f);
+    }
+    /// <summary>
+    /// 自定义控件透明度初始化
+    /// </summary>
+    public void InitSelfModelParts()
+    {
+        string filePath = Config.DirectoryPath + Config.ModelConfigFileName;
+        Dictionary<string, Dictionary<string, string>> dataDic = FileOperate.ParseIniFile(filePath);
+        if (!dataDic.ContainsKey(Config.BasePartChange)) return;
+        Dictionary<string, string> partDic = dataDic[Config.BasePartChange];
+        foreach (KeyValuePair<string, string> item in partDic)
+            AddPartList(item.Key, float.Parse(item.Value) / 100f);
     }
 
     /// <summary>
-    /// 自定义控件渲染更新
+    /// 自定义控件渲染初始化
     /// </summary>
     public void InitSelfModelDrawables()
     {
@@ -372,17 +363,65 @@ public class Model : MonoBehaviour
         Dictionary<string, Dictionary<string, string>> dataDic = FileOperate.ParseIniFile(filePath);
         if (!dataDic.ContainsKey(Config.BaseDrawableChange)) return;
         Dictionary<string, string> drawableDic = dataDic[Config.BaseDrawableChange];
-
         foreach (KeyValuePair<string, string> item in drawableDic)
             AddDrawableList(item.Key, float.Parse(item.Value));
     }
 
+
+
+    private void LateUpdate()
+    {
+        CubismModel cubismModel = Live2dObject.FindCubismModel();
+        if (cubismModel == null)
+        {
+            return;
+        }
+        //控件偏移 & 谐波 要求实时刷新
+        foreach (KeyValuePair<string, float> paramPair in ParamItemsDic)
+        {
+            CubismParameter parameterItem = cubismModel.Parameters.FindById(paramPair.Key);
+            if (parameterItem != null)
+                parameterItem.Value = paramPair.Value;
+            parameterItem.BlendToValue(CubismParameterBlendMode.Override, paramPair.Value);
+        }
+        //控件透明度设置
+        if (PartItemsList.Count > 0)
+        {
+            Tuple<string, float> partTuple = PartItemsList[0];
+            if (partTuple != null)
+            {
+                CubismPart cubismPart = cubismModel.Parts.FindById(partTuple.Item1);
+                if (cubismPart != null)
+                {
+                    Debug.Log("控件透明调度: " + partTuple.Item1 + " " + partTuple.Item2);
+                    cubismPart.Opacity = partTuple.Item2;
+                }
+            }
+            PartItemsList.RemoveAt(0);
+        }
+
+        //控件显示隐藏执行一次就可以
+        if (DrawItemsList.Count > 0)
+        {
+            Tuple<string, float> drawTuple = DrawItemsList[0];
+            if (drawTuple != null)
+            {
+                CubismDrawable drawableItem = cubismModel.Drawables.FindById(drawTuple.Item1);
+                if (drawableItem != null)
+                {
+                    Debug.Log("隐藏或显示变化的控件: " + drawTuple.Item1 + "  " + drawTuple.Item2);
+                    drawableItem.gameObject.SetActive(drawTuple.Item2 > 0.5f ? true : false);
+                }
+            }
+            DrawItemsList.RemoveAt(0);
+        }
+    }
     /// <summary>
     /// 更新模型参数
     /// </summary>
     public void UpdateModelCondition()
     {
-        if (Live2dObject == null) { return; }
+        Debug.Log("根据Config刷新模型列表的通用参数");
         //更新模型大小
         SetModelSize(new Vector3(Config.ScaleProportionItem.Param, Config.ScaleProportionItem.Param, 1));
         //更新模型位置
@@ -419,53 +458,6 @@ public class Model : MonoBehaviour
         if (Live2dObject.GetComponent<CubismAudioMouthInput>() != null) Live2dObject.GetComponent<CubismAudioMouthInput>().Gain = Config.GainItem.Param;
         if (Live2dObject.GetComponent<CubismAudioMouthInput>() != null) Live2dObject.GetComponent<CubismAudioMouthInput>().Smoothing = Config.SmoothingItem.Param;
     }
-
-    /// <summary>
-    /// Parameters控件协调
-    /// </summary>
-    public void AddParameterList(string itemName, float value)
-    {
-        ParamItemsDic[itemName] = value;
-    }
-    /// <summary>
-    /// Drawables控件协调
-    /// </summary>
-    public void AddDrawableList(string itemName, float value)
-    {
-        DrawItemsList.Add(Tuple.Create(itemName, value));
-    }
-    private void LateUpdate()
-    {
-        CubismModel cubismModel = Live2dObject.FindCubismModel();
-        if (cubismModel == null)
-        {
-            return;
-        }
-        //控件偏移 & 谐波 要求实时刷新
-        foreach (KeyValuePair<string, float> paramPair in ParamItemsDic)
-        {
-            CubismParameter parameterItem = cubismModel.Parameters.FindById(paramPair.Key);
-            if (parameterItem != null)
-                parameterItem.BlendToValue(CubismParameterBlendMode.Override, paramPair.Value);
-        }
-
-        //控件显示隐藏执行一次就可以
-        if (DrawItemsList.Count > 0)
-        {
-            Tuple<string, float> drawTuple = DrawItemsList[0];
-            if (drawTuple != null)
-            {
-                CubismDrawable drawableItem = cubismModel.Drawables.FindById(drawTuple.Item1);
-                if (drawableItem != null)
-                {
-                    Debug.Log("隐藏或显示变化的控件: " + drawTuple.Item1 + "  " + drawTuple.Item2);
-                    drawableItem.gameObject.SetActive(drawTuple.Item2 > 0.0 ? true : false);
-                }
-            }
-            DrawItemsList.RemoveAt(0);
-        }
-    }
-
     /// <summary>
     /// 默认挂载脚本或物体
     /// </summary>
@@ -473,8 +465,8 @@ public class Model : MonoBehaviour
     {
         //挂载默认的脚本
         if (Live2dObject.GetComponent<CubismUpdateController>() == null) Live2dObject.AddComponent<CubismUpdateController>();
-        if (Live2dObject.GetComponent<CubismParameterStore>() == null) Live2dObject.AddComponent<CubismParameterStore>();
         if (Live2dObject.GetComponent<CubismPoseController>() == null) Live2dObject.AddComponent<CubismPoseController>();
+        if (Live2dObject.GetComponent<CubismParameterStore>() == null) Live2dObject.AddComponent<CubismParameterStore>();
         if (Live2dObject.GetComponent<CubismExpressionController>() == null) Live2dObject.AddComponent<CubismExpressionController>();
         if (Live2dObject.GetComponent<CubismFadeController>() == null) Live2dObject.AddComponent<CubismFadeController>();
         if (Live2dObject.GetComponent<CubismAutoEyeBlinkInput>() == null) Live2dObject.AddComponent<CubismAutoEyeBlinkInput>();
@@ -482,7 +474,7 @@ public class Model : MonoBehaviour
         if (Live2dObject.GetComponent<CubismAudioMouthInput>() == null) Live2dObject.AddComponent<CubismAudioMouthInput>();
         if (Live2dObject.GetComponent<CubismLookController>() == null) Live2dObject.AddComponent<CubismLookController>();
         if (Live2dObject.GetComponent<CubismEyeBlinkController>() == null) Live2dObject.AddComponent<CubismEyeBlinkController>();
-
+        if (Live2dObject.GetComponent<CubismPhysicsController>() == null) Live2dObject.AddComponent<CubismPhysicsController>();
 
         foreach (string itemname in Config.NeedAddCubismLookParameterObjectStrings)
         {
@@ -542,6 +534,52 @@ public class Model : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// 删除模型
+    /// </summary>
+    public void DestroyModel()
+    {
+        Destroy(Live2dParameters);
+        Destroy(Live2dParts);
+        Destroy(Live2dDrawables);
+        Destroy(Live2dCubismModel);
+
+        if (Live2dParametersTransforms != null)
+            foreach (Transform itemname in Live2dParametersTransforms)
+                Destroy(itemname);
+
+        if (Live2dPartsTransforms != null)
+            foreach (Transform itemname in Live2dPartsTransforms)
+                Destroy(itemname);
+
+        if (Live2dDrawablesTransforms != null)
+            foreach (Transform itemname in Live2dDrawablesTransforms)
+                Destroy(itemname);
+
+        Destroy(TransformParamAngleX);
+        Destroy(TransformParamAngleY);
+        Destroy(TransformParamAngleZ);
+        Destroy(TransformParamBodyAngleX);
+        Destroy(TransformParamBodyAngleY);
+        Destroy(TransformParamBodyAngleZ);
+        Destroy(TransformParamEyeBallX);
+        Destroy(TransformParamEyeBallY);
+
+
+        while (OpeningLive2dModelList.Count > 0)
+        {
+            GameObject lt = OpeningLive2dModelList[0];
+            Destroy(lt);
+            OpeningLive2dModelList.RemoveAt(0);
+        }
+        OpeningLive2dModelList.Clear();
+        ParamItemsDic.Clear();
+
+        Resources.UnloadUnusedAssets();
+
+    }
+
     /// <summary>
     /// 通过json加载模型信息
     /// </summary>

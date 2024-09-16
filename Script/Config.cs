@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using UnityEngine;
-
 public class Config : MonoBehaviour
 {
 
@@ -25,21 +24,23 @@ public class Config : MonoBehaviour
     /// <summary>
     /// 常量信息
     /// </summary>
-    public static readonly string ModelConfigFileName       = "ModelConfig.ini";
-    public static readonly string BaseParameterName         = "PARAMETERLIST";
-    public static readonly string BaseDrawable              = "DRAWABLELIST";
-    public static readonly string BaseParameterChangeName   = "PARAMETERCHANGELIST";
-    public static readonly string BaseDrawableChange        = "DRAWABLECHANGELIST";
+    public static readonly string ModelConfigFileName = "ModelConfig.ini";
+    public static readonly string BaseParameter = "PARAMETERLIST";
+    public static readonly string BasePart = "PARTLIST";
+    public static readonly string BaseDrawable = "DRAWABLELIST";
+    public static readonly string BaseParameterChange = "PARAMETERCHANGELIST";
+    public static readonly string BasePartChange = "PARTCHANGELIST";
+    public static readonly string BaseDrawableChange = "DRAWABLECHANGELIST";
 
 
     /// <summary>
     /// 基本信息
     /// </summary>
-    public static string ModelPath      = null;
-    public static string DirectoryPath  = null;
-    public static string PersonName     = "";
-    public static string ModelName      = "Model";
-    public static int    ModelId        = 0;
+    public static string ModelPath = null;
+    public static string DirectoryPath = null;
+    public static string PersonName = "";
+    public static string ModelName = "Model";
+    public static int ModelId = 0;
 
     /// <summary>
     /// 布尔参数

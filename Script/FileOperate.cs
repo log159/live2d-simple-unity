@@ -60,6 +60,11 @@ public class FileOperate : MonoBehaviour
     // 保存 INI 文件
     public static void WriteIniFile(Dictionary<string, Dictionary<string, string>> data, string filePath)
     {
+        if (!FileExists(filePath))
+        {
+            FileStream fs = File.Create(filePath);
+            fs.Close();
+        }
         Dictionary<string, Dictionary<string, string>> willData = ParseIniFile(filePath);
         foreach (var kvp in data)
         {
