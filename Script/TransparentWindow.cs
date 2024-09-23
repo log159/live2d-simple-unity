@@ -1,12 +1,11 @@
-//#define IS_TRANSPARENT
+/*这个宏定义后会使得程序无法在Unity编辑器调试，导出后直接运行看到窗口透明效果*/
+#define IS_TRANSPARENT
 
 using UnityEngine;
 using System.Collections;
 using System;
 using System.Runtime.InteropServices;
 using System.IO;
-using static TransparentWindow;
-using UnityEngine.XR;
 
 public class TransparentWindow : MonoBehaviour
 {
@@ -111,7 +110,7 @@ public class TransparentWindow : MonoBehaviour
 
     public const int SW_HIDE = 0;
     public const int SW_MAXIMIZE = 3;
-    public const int SW_SHOW = 0;
+    public const int SW_SHOW = 1;
     public const int SW_MINIMIZE = 6;
     public const int SW_RESTORE = 9;
 
@@ -133,11 +132,19 @@ public class TransparentWindow : MonoBehaviour
     public static IntPtr hwnd;
     public static IntPtr dialogHwnd;
 
+    private static bool mouseEnter = false;
+
     bool istop = true;
 
 
 #if IS_TRANSPARENT
-    void Awake()
+    private void Awake()
+    {
+        Application.targetFrameRate = 120;
+
+        SetWindowInit();
+    }
+    private void SetWindowInit()
     {
         ResWidth = Screen.currentResolution.width;
         ResHeight = Screen.currentResolution.height;
@@ -171,7 +178,6 @@ public class TransparentWindow : MonoBehaviour
         var margins = new MARGINS() { cxLeftWidth = -1 };
         DwmExtendFrameIntoClientArea(hwnd, ref margins);
     }
-
     private void SetWindowTopApha(bool isTop, bool isApha)
     {
         isWinTop = isTop;
@@ -204,7 +210,6 @@ public class TransparentWindow : MonoBehaviour
         //解决程序加载时会闪白色边框的现象
         SetWindowPos(hwnd, -1, currentX, currentY, 0, 0, SWP_SHOWWINDOW);
     }
-    private static bool mouseEnter = false;
 
     void Update()
     {
@@ -219,9 +224,7 @@ public class TransparentWindow : MonoBehaviour
         UpdateWindowStyle();
     }
 
-
-
-    //SetSize是废弃的接口
+    //SetSize是废弃的接口(直接修改Window大小)
     public void SetSize(int size)
     {
         // 检查窗口句柄是否有效
@@ -234,19 +237,14 @@ public class TransparentWindow : MonoBehaviour
         int rh = ResHeight;
         int cx = currentX;
         int cy = currentY;
-
-
         RECT rect;
         if (GetWindowRect(hwnd, out rect))
         {
             cx = rect.left;
             cy = rect.top;
         }
-
         cx = cx + (ResWidth - size) / 2;
         cy = cy + (ResHeight - size) / 2;
-
-
         rw = size;
         rh = size;
         ResWidth = rw;
@@ -262,7 +260,7 @@ public class TransparentWindow : MonoBehaviour
 
     public void ShowTaskBar()
     {
-        ShowWindow(hwnd, SW_RESTORE);
+        ShowWindow(hwnd, SW_SHOW);
     }
     public void HideTaskBar()
     {
@@ -271,7 +269,7 @@ public class TransparentWindow : MonoBehaviour
 
 #endif
 
-        public void SetWinStyle(enumWinStyle enumWinStyle)
+    public void SetWinStyle(enumWinStyle enumWinStyle)
     {
         WinStyle = enumWinStyle;
     }
@@ -302,8 +300,5 @@ public class TransparentWindow : MonoBehaviour
                 SetWindowTopApha(false, false);
         }
 #endif
-
     }
-
-
 }

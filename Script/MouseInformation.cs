@@ -15,7 +15,7 @@ public class MouseInformation : MonoBehaviour
     public static float TrueWorldX { get; private set; }
     public static float TrueWorldY { get; private set; }
 
-    public static readonly Color InitColor = new Color(0, 0, 0);
+    public static readonly Color InitColor = new Color(0,0,0);
     public static Color ChangeColor;
 
     bool IsEffective = true;

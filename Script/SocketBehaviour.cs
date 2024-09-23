@@ -1,6 +1,10 @@
-//#define IS_UNABRIDGED
-//#define IS_CUSTOMER
+/*作为服务器*/
 #define IS_SERVER
+/*其它*/
+#define IS_LOGCHAT
+
+/*作为客户端*/
+//#define IS_CUSTOMER
 
 using System;
 using System.IO;
@@ -39,12 +43,14 @@ public class SocketBehaviour : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-#if IS_UNABRIDGED
-        string pathini = System.Environment.CurrentDirectory + "\\config.ini";
+        string pathini = System.Environment.CurrentDirectory + "/config.ini";
+
         Dictionary<string, Dictionary<string, string>> dicini = FileOperate.ParseIniFile(pathini);
         host = dicini["SERVERS"]["ADDRESS"];
         port = int.Parse(dicini["SERVERS"]["PORT"]);
-#endif
+
+        Debug.Log("ip: " + host + " port: " + port);
+
         StartServer();
     }
 
@@ -55,13 +61,13 @@ public class SocketBehaviour : MonoBehaviour
             IPAddress ipAddress = IPAddress.Parse(host);
             listener = new TcpListener(ipAddress, port);
             listener.Start();
-            print("Server started, waiting for connections...");
+            Debug.Log("Server started, waiting for connections...");
 
             listener.BeginAcceptSocket(new AsyncCallback(AcceptCallback), listener);
         }
         catch (Exception e)
         {
-            print(e.Message);
+            Debug.Log(e.Message);
         }
     }
 
@@ -72,8 +78,10 @@ public class SocketBehaviour : MonoBehaviour
         if (clientSocket != null)
         {
             connectedClients.Add(clientSocket);
-            print("Client connected: " + clientSocket.RemoteEndPoint.ToString());
-
+            Debug.Log("Client connected: " + clientSocket.RemoteEndPoint.ToString());
+#if IS_LOGCHAT
+            SocketBehaviour.Singleton.Send("Hwnd:" + TransparentWindow.hwnd.ToString() + ";");
+#endif
             // 开始接收该客户端的数据
             Receive(clientSocket);
         }
@@ -95,7 +103,7 @@ public class SocketBehaviour : MonoBehaviour
         }
         catch (Exception e)
         {
-            print(e.Message);
+            Debug.Log(e.Message);
         }
     }
 
@@ -124,7 +132,7 @@ public class SocketBehaviour : MonoBehaviour
         else
         {
             // 客户端断开连接
-            print("Client disconnected: " + clientSocket.RemoteEndPoint.ToString());
+            Debug.Log("Client disconnected: " + clientSocket.RemoteEndPoint.ToString());
             clientSocket.Shutdown(SocketShutdown.Both);
             clientSocket.Close();
             connectedClients.Remove(clientSocket);
@@ -163,7 +171,6 @@ public class SocketBehaviour : MonoBehaviour
 }
 
 #endif
-
 #if IS_CUSTOMER
 public class SocketBehaviour : MonoBehaviour
 {

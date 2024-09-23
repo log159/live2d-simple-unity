@@ -25,12 +25,14 @@ public class Config : MonoBehaviour
     /// 常量信息
     /// </summary>
     public static readonly string ModelConfigFileName = "ModelConfig.ini";
-    public static readonly string BaseParameter = "PARAMETERLIST";
+    public static readonly string BaseParameter  = "PARAMETERLIST";
     public static readonly string BasePart = "PARTLIST";
     public static readonly string BaseDrawable = "DRAWABLELIST";
     public static readonly string BaseParameterChange = "PARAMETERCHANGELIST";
     public static readonly string BasePartChange = "PARTCHANGELIST";
     public static readonly string BaseDrawableChange = "DRAWABLECHANGELIST";
+    public static readonly string BaseExpression = "EXPRESSIONLIST";
+    public static readonly string BaseMotion = "MOTIONLIST";
 
 
     /// <summary>
@@ -46,7 +48,7 @@ public class Config : MonoBehaviour
     /// 布尔参数
     /// </summary>
     //是否看向鼠标
-    public static bool IsLookMouse = true;
+    public static bool IsLookMouse = false;
 
 
     /// <summary>
@@ -90,7 +92,7 @@ public class Config : MonoBehaviour
     // 人物看向鼠标速度参数
     public static ParamItem DampingItem = new ParamItem("Damping", 0.15f, new PointF(0f, 2f));
     // 模型缩放参数
-    public static ParamItem ScaleProportionItem = new ParamItem("ScaleProportion", 3f, new PointF(0.1f, 100f));
+    public static ParamItem ScaleProportionItem = new ParamItem("ScaleProportion", 5f, new PointF(0.1f, 100f));
     //模型位置参数
     public static ParamItem PositionXItem = new ParamItem("Position", 0f, new PointF(MIN, MAX));
     public static ParamItem PositionYItem = new ParamItem("Position", 0f, new PointF(MIN, MAX));

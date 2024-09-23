@@ -58,7 +58,7 @@ public class FileOperate : MonoBehaviour
     }
 
     // 保存 INI 文件
-    public static void WriteIniFile(Dictionary<string, Dictionary<string, string>> data, string filePath)
+    public static void WriteIniFile(Dictionary<string, Dictionary<string, string>>data,string filePath)
     {
         if (!FileExists(filePath))
         {
@@ -87,7 +87,7 @@ public class FileOperate : MonoBehaviour
     }
 
     //写文件
-    public static void WriteAllText(string filePath, string data)
+    public static void WriteAllText(string filePath,string data)
     {
         File.WriteAllText(filePath, data, Encoding.UTF8);
     }
@@ -95,5 +95,13 @@ public class FileOperate : MonoBehaviour
     public static bool FileExists(string filePath)
     {
         return File.Exists(filePath);
+    }
+
+    //文件名提取
+    public static string GetFileNameWithoutExtension(string filePath)
+    {
+        string fileNameWithExtension = Path.GetFileName(filePath);
+        string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileNameWithExtension);
+        return fileNameWithoutExtension;
     }
 }
